@@ -5,6 +5,7 @@ name: Generate release-artifacts
 on:
   release:
     types: 
+        - edited
         - created
 
 # workflow tasks
@@ -19,7 +20,7 @@ jobs:
         uses: thatisuday/go-cross-build@v1
         with:
             platforms: 'linux/amd64, darwin/amd64, windows/amd64'
-            package: 'demo'
+            package: ''
             name: 'tmx-uploader'
             compress: 'false'
             dest: 'dist'

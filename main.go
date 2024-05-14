@@ -19,9 +19,14 @@ import (
 	"path/filepath"
 	"slices"
 	// "time"
+	_ "embed"
 )
 
+//go:embed logo.png
+var logoFilePath string
+
 var Cookie string = ""
+
 
 var GbxDir string
 // var uploadUrl string = "http://127.0.0.1:8080"
@@ -58,7 +63,7 @@ func chooseDirectory(w fyne.Window, h *widget.Label) {
 
 func main() {
 
-	image := canvas.NewImageFromFile("./logo.png")
+	image := canvas.NewImageFromFile(logoFilePath)
 	image.FillMode = canvas.ImageFillOriginal
 
 	emptyValidator := func(s string) error {
