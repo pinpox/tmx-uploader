@@ -22,8 +22,8 @@ import (
 	_ "embed"
 )
 
-//go:embed logo.png
-var logoFilePath string
+//go:generate fyne bundle -o bundled.go logo.png
+//go:generate fyne bundle -o bundled.go -append Icon.png
 
 var Cookie string = ""
 
@@ -63,7 +63,7 @@ func chooseDirectory(w fyne.Window, h *widget.Label) {
 
 func main() {
 
-	image := canvas.NewImageFromFile(logoFilePath)
+	image := canvas.NewImageFromResource(resourceLogoPng)
 	image.FillMode = canvas.ImageFillOriginal
 
 	emptyValidator := func(s string) error {
@@ -72,7 +72,9 @@ func main() {
 		}
 		return nil
 	}
-	myApp := app.New()
+	// myApp := app.New()
+	myApp := app.NewWithID("pinpox.tmx-uploader")
+	myApp.SetIcon(resourceIconPng)
 	myWindow := myApp.NewWindow("Entry Widget")
 	myWindow.SetTitle("TMX Uploader")
 	myWindow.SetFixedSize(true)
