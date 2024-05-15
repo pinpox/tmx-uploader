@@ -1,0 +1,32 @@
+name: Build for Windows
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: WillAbides/setup-go-faster@v1.6.0
+      id: setup-go-faster
+      with:
+        go-version: "*"
+
+    - name: go install fyne
+      run: go install github.com/fyne-io/fyne-cross@latest
+
+    - name: Package for Windows
+      run: fyne-cross windows -arch=amd64
+      # run: fyne-cross windows -arch=amd64 && mkdir -p pkg && mv fyne-cross/bin/windows-amd64/Anarchy-Droid.exe pkg/Anarchy-Droid_windows_amd64.exe && mv fyne-cross/dist/windows-amd64/Anarchy-Droid.exe.zip pkg/Anarchy-Droid.zip
+    
+    # - uses: actions/upload-artifact@v2
+    #   with:
+    #     name: Anarchy-Droid (Windows)
+    #     path: pkg
+
+    # - uses: actions/upload-artifact@v2
+    #   with:
+    #     name: Anarchy-Droid_windows_amd64.exe
+    #     path: pkg/Anarchy-Droid_windows_amd64.exe
