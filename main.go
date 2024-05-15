@@ -4,8 +4,15 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"bytes"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
+	"slices"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -13,13 +20,11 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
-	"io"
-	"net/http"
-	"os"
-	"path/filepath"
-	"slices"
-	// "time"
+
 	_ "embed"
+
+	"github.com/browserutils/kooky"
+	_ "github.com/browserutils/kooky/browser/all"
 )
 
 //go:generate fyne bundle -o bundled.go logo.png
@@ -27,8 +32,8 @@ import (
 
 var Cookie string = ""
 
-
 var GbxDir string
+
 // var uploadUrl string = "http://127.0.0.1:8080"
 var uploadUrl string = "https://trackmania.exchange/upload/replay"
 
@@ -63,6 +68,26 @@ func chooseDirectory(w fyne.Window, h *widget.Label) {
 
 func main() {
 
+	stores := kooky.FindAllCookieStores()
+	var lastExpire time.Time
+	var browser string
+
+	for _, s := range stores {
+		cookies, err := s.ReadCookies(kooky.Valid, kooky.DomainHasSuffix(`trackmania.exchange`), kooky.Name(".mxclientauth"))
+		if err != nil {
+			// No cookies found or readable
+			continue
+		}
+
+		for _, cookie := range cookies {
+			if cookie.Expires.After(lastExpire) {
+				lastExpire = cookie.Expires
+				Cookie = fmt.Sprintf("%s=%s", cookie.Name, cookie.Value)
+				browser = s.Browser()
+			}
+		}
+	}
+
 	image := canvas.NewImageFromResource(resourceLogoPng)
 	image.FillMode = canvas.ImageFillOriginal
 
@@ -78,10 +103,11 @@ func main() {
 	myWindow := myApp.NewWindow("Entry Widget")
 	myWindow.SetTitle("TMX Uploader")
 	myWindow.SetFixedSize(true)
-	myWindow.Resize(fyne.NewSize(600, 400))
+	myWindow.Resize(fyne.NewSize(300, 400))
 
 	input := widget.NewEntry()
 	input.SetPlaceHolder("Paste Cookie here")
+
 	input.Validate()
 
 	progress := widget.NewProgressBar()
@@ -90,11 +116,16 @@ func main() {
 	input.Validator = emptyValidator
 
 	selectedDir := widget.NewLabel("No Files Chosen")
-	statusText := widget.NewLabel("Status")
+
+	statusText := widget.NewLabel("No cookie was auto-detected. Try to log in or paste manually")
+
+	if Cookie != "" {
+		input.Text = Cookie
+		statusText.SetText("Cookie automatically set from: " + browser)
+	}
 
 	uploadButton := widget.NewButton("Upload", func() {
 
-		log.Println("Cookie was:", input.Text)
 		Cookie = input.Text
 
 		log.Println("Reading files form", GbxDir)
