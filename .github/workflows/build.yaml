@@ -4,22 +4,22 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-
     steps:
-    - uses: actions/checkout@v2
-    - uses: WillAbides/setup-go-faster@v1.6.0
-      id: setup-go-faster
-      with:
-        go-version: "*"
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21.x'
+      - name: Install dependencies
+        run: |
+          go get .
+          go get example.com/octo-examplemodule
+          go get example.com/octo-examplemodule@v1.3.4
+          go install github.com/fyne-io/fyne-cross@latest
 
-    - name: go install fyne
-      run: go install github.com/fyne-io/fyne-cross@latest
-
-    - name: Package for Windows
-      run: fyne-cross version && fyne-cross windows -arch=amd64 -app-id=pinpox.tmx.uploader
-      # run: fyne-cross windows -arch=amd64 && mkdir -p pkg && mv fyne-cross/bin/windows-amd64/Anarchy-Droid.exe pkg/Anarchy-Droid_windows_amd64.exe && mv fyne-cross/dist/windows-amd64/Anarchy-Droid.exe.zip pkg/Anarchy-Droid.zip
+      - name: Package for Windows
+        run: fyne-cross version && fyne-cross windows -arch=amd64 -app-id=pinpox.tmx.uploader
+        # run: fyne-cross windows -arch=amd64 && mkdir -p pkg && mv fyne-cross/bin/windows-amd64/Anarchy-Droid.exe pkg/Anarchy-Droid_windows_amd64.exe && mv fyne-cross/dist/windows-amd64/Anarchy-Droid.exe.zip pkg/Anarchy-Droid.zip
     
     # - uses: actions/upload-artifact@v2
     #   with:
