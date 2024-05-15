@@ -72,8 +72,8 @@ func main() {
 		}
 		return nil
 	}
-	// myApp := app.New()
-	myApp := app.NewWithID("pinpox.tmx-uploader")
+
+	myApp := app.NewWithID("pinpox.tmx.uploader")
 	myApp.SetIcon(resourceIconPng)
 	myWindow := myApp.NewWindow("Entry Widget")
 	myWindow.SetTitle("TMX Uploader")
